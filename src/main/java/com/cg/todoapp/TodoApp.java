@@ -6,13 +6,17 @@ import com.cg.todoapp.service.TodoManager;
 import com.cg.todoapp.ui.UserInterface;
 import com.cg.todoapp.util.FileHandler;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 
 public class TodoApp {
     public static void main(String[] args) {
         TodoManager manager = new TodoManager();
-        UserInterface ui = new UserInterface();
+        Scanner scanner = new Scanner(System.in);
+        UserInterface ui = new UserInterface(scanner);
         FileHandler fileHandler = new FileHandler();
 
         List<Todo> loadedTodos = fileHandler.loadTodos();
@@ -30,8 +34,12 @@ public class TodoApp {
             switch (choice) {
                 case 1:
                     Todo newTodo = ui.getTodoInputFromUser(nextId++);
-                    manager.addTodo(newTodo);
-                    System.out.println("Todo added.");
+                    if (newTodo != null) {
+                        manager.addTodo(newTodo);
+                        System.out.println("Todo added.");
+                    } else {
+                        System.out.println("Failed to add Todo. Please try again.");
+                    }
                     break;
 
                 case 2:
@@ -41,22 +49,26 @@ public class TodoApp {
                 case 3:
                     int idToUpdate = ui.getTodoIdInput();
                     Todo updated = ui.getTodoInputFromUser(idToUpdate);
-                    manager.updateTodo(updated);
-                    System.out.println(" Todo updated.");
+                    if (updated != null) {
+                        manager.updateTodo(updated);
+                        System.out.println("Todo updated.");
+                    } else {
+                        System.out.println("Failed to update Todo.");
+                    }
                     break;
 
                 case 4:
                     manager.deleteTodo(ui.getTodoIdInput());
-                    System.out.println(" Todo deleted.");
+                    System.out.println("Todo deleted.");
                     break;
 
                 case 5:
                     Todo complete = manager.getTodoById(ui.getTodoIdInput());
                     if (complete != null) {
                         complete.markComplete();
-                        System.out.println(" Marked as complete.");
+                        System.out.println("Marked as complete.");
                     } else {
-                        System.out.println(" Todo not found.");
+                        System.out.println("Todo not found.");
                     }
                     break;
 
@@ -64,62 +76,77 @@ public class TodoApp {
                     Todo incomplete = manager.getTodoById(ui.getTodoIdInput());
                     if (incomplete != null) {
                         incomplete.markIncomplete();
-                        System.out.println(" Marked as incomplete.");
+                        System.out.println("Marked as incomplete.");
                     } else {
-                        System.out.println(" Todo not found.");
+                        System.out.println("Todo not found.");
                     }
                     break;
 
                 case 7:
                     System.out.print("Enter keyword to search: ");
-                    String keyword = new java.util.Scanner(System.in).nextLine();
+                    String keyword = scanner.nextLine();
                     ui.printTodos(manager.searchByKeyword(keyword));
                     break;
 
                 case 8:
                     System.out.print("Enter priority (LOW, MEDIUM, HIGH): ");
-                    String priority = new java.util.Scanner(System.in).nextLine();
-                    ui.printTodos(manager.filterByPriority(Priority.valueOf(priority.toUpperCase())));
+                    try {
+                        String priorityStr = scanner.nextLine();
+                        Priority priority = Priority.valueOf(priorityStr.toUpperCase());
+                        ui.printTodos(manager.filterByPriority(priority));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid priority. Please enter LOW, MEDIUM, or HIGH.");
+                    }
                     break;
 
                 case 9:
-                    System.out.print("Start date (yyyy-MM-dd): ");
-                    String start = new java.util.Scanner(System.in).nextLine();
-                    System.out.print("End date (yyyy-MM-dd): ");
-                    String end = new java.util.Scanner(System.in).nextLine();
-                    ui.printTodos(manager.filterByDateRange(
-                            java.time.LocalDate.parse(start),
-                            java.time.LocalDate.parse(end)));
+                    try {
+                        System.out.print("Start date (yyyy-MM-dd): ");
+                        LocalDate start = LocalDate.parse(scanner.nextLine());
+
+                        System.out.print("End date (yyyy-MM-dd): ");
+                        LocalDate end = LocalDate.parse(scanner.nextLine());
+
+                        ui.printTodos(manager.filterByDateRange(start, end));
+                    } catch (DateTimeParseException e) {
+                        System.out.println("Invalid date format. Use yyyy-MM-dd.");
+                    }
                     break;
 
                 case 10:
                     System.out.println("Sort by: 1) Priority 2) Due Date 3) Creation Order");
-                    int sortOption = Integer.parseInt(new java.util.Scanner(System.in).nextLine());
+                    try {
+                        int sortOption = Integer.parseInt(scanner.nextLine());
+                        Comparator<Todo> comparator;
 
-                    Comparator<Todo> comparator;
-                    switch (sortOption) {
-                        case 1:
-                            comparator = Comparator.comparing(Todo::getPriority);
-                            break;
-                        case 2:
-                            comparator = Comparator.comparing(Todo::getDueDate);
-                            break;
-                        default:
-                            comparator = Comparator.comparing(Todo::getId);
-                            break;
+                        switch (sortOption) {
+                            case 1:
+                                comparator = Comparator.comparing(Todo::getPriority);
+                                break;
+                            case 2:
+                                comparator = Comparator.comparing(Todo::getDueDate);
+                                break;
+                            default:
+                                comparator = Comparator.comparing(Todo::getId);
+                                break;
+                        }
+                        ui.printTodos(manager.sortBy(comparator));
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid sorting option.");
                     }
-                    ui.printTodos(manager.sortBy(comparator));
                     break;
 
                 case 11:
                     fileHandler.saveTodos(manager.getAllTodos());
-                    System.out.println(" Exiting. Todos saved.");
+                    System.out.println("Exiting. Todos saved.");
                     break;
 
                 default:
-                    System.out.println(" Invalid option. Try again.");
+                    System.out.println("Invalid option. Try again.");
             }
 
         } while (choice != 11);
+
+        scanner.close();
     }
 }

@@ -10,7 +10,6 @@ public class FileHandler {
 
     private static final String FILE_NAME = "todos.dat";
 
-
     public void saveTodos(List<Todo> todos) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
             oos.writeObject(new ArrayList<>(todos));
@@ -18,7 +17,6 @@ public class FileHandler {
             System.out.println("❌ Error saving todos: " + e.getMessage());
         }
     }
-
 
     @SuppressWarnings("unchecked")
     public List<Todo> loadTodos() {
