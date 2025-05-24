@@ -1,0 +1,29 @@
+[ {
+  "id" : 1,
+  "title" : "play",
+  "description" : "football",
+  "priority" : "HIGH",
+  "dueDate" : [ 2025, 5, 26 ],
+  "completed" : false
+}, {
+  "id" : 2,
+  "title" : "read",
+  "description" : "books read",
+  "priority" : "HIGH",
+  "dueDate" : [ 2025, 5, 24 ],
+  "completed" : false
+}, {
+  "id" : 3,
+  "title" : "swim",
+  "description" : "evening",
+  "priority" : "MEDIUM",
+  "dueDate" : [ 2025, 6, 12 ],
+  "completed" : false
+}, {
+  "id" : 4,
+  "title" : "walk",
+  "description" : "walking is important",
+  "priority" : "LOW",
+  "dueDate" : [ 2025, 6, 22 ],
+  "completed" : false
+} ]

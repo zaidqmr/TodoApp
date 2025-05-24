@@ -13,6 +13,10 @@ public class Todo implements Serializable {
     private LocalDate dueDate;
     private boolean isCompleted;
 
+    // ✅ Default constructor required by Jackson
+    public Todo() {
+    }
+
     public Todo(int id, String title, String description, Priority priority, LocalDate dueDate) {
         this.id = id;
         this.title = title;
@@ -22,7 +26,6 @@ public class Todo implements Serializable {
         this.isCompleted = false;
     }
 
-    // Getters
     public int getId() {
         return id;
     }
@@ -47,7 +50,6 @@ public class Todo implements Serializable {
         return isCompleted;
     }
 
-    // Status methods
     public void markComplete() {
         this.isCompleted = true;
     }
